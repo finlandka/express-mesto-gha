@@ -18,6 +18,8 @@ app.use((req, res, next) => {
 });
 app.use('/users', users);
 app.use('/cards', cards);
+app.use('*', (req, res) => {
+  res.status(404).json({ message: 'Запрашиваемый ресурс не найден' });
+});
 
-// eslint-disable-next-line no-console
-app.listen(3000, () => console.log('App listening on port 3000'));
+app.listen(3000);
