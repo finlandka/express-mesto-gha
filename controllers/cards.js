@@ -36,7 +36,7 @@ const deleteCard = (req, res) => {
     })
     .catch((err) => {
       if (err.name === 'CastError') {
-        res.status(BAD_REQUEST).send({ message: 'Карточка с указанным _id не найдена' });
+        res.status(BAD_REQUEST).send({ message: 'Карточка с указанным _id не найдена. Некорректный id' });
       }
     });
 };
@@ -76,7 +76,7 @@ const deleteLikeCard = (req, res) => {
     .catch((err) => {
       switch (err.name) {
         case 'CastError':
-          res.status(NOT_FOUND).send({ message: 'Передан несуществующий _id карточки' });
+          res.status(BAD_REQUEST).send({ message: 'Передан некорректный _id карточки' });
           break;
         case 'ValidationError':
           res.status(BAD_REQUEST).send({ message: 'Переданы некорректные данные для снятия лайка' });
