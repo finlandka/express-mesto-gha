@@ -33,10 +33,15 @@ const deleteCard = (req, res) => {
     .orFail(new NotValidIdError('NotValidId'))
     .then((card) => res.status(OK).send({ data: card }))
     .catch((err) => {
-      if (err.name === 'CastError') {
-        res.status(BAD_REQUEST).send({ message: 'Карточка с указанным _id не найдена. Некорректный id' });
-      } else {
-        res.status(NOT_FOUND).send({ message: 'Карточка с указанным _id не найдена' });
+      switch (err.name) {
+        case 'CastError':
+          res.status(BAD_REQUEST).send({ message: 'Карточка с указанным _id не найдена. Некорректный id' });
+          break;
+        case 'NotValidId':
+          res.status(NOT_FOUND).send({ message: 'Карточка с указанным _id не найдена. Не существующий id' });
+          break;
+        default:
+          res.status(INTERNAL_SERVER_ERROR).send({ message: 'На сервере произошла ошибка' });
       }
     });
 };
