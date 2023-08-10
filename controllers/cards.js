@@ -1,91 +1,53 @@
 const Card = require('../models/card');
-const NotValidIdError = require('../NotValidIdError');
-const {
-  OK, CREATED, BAD_REQUEST, NOT_FOUND, INTERNAL_SERVER_ERROR,
-} = require('../constantsStatus');
+const ForbiddenError = require('../errors/ForbiddenError');
+const NotFoundError = require('../errors/NotFoundError');
+const { OK, CREATED } = require('../constantsStatus');
 
-const getCards = (req, res) => {
+const getCards = (req, res, next) => {
   Card.find({})
     .populate('owner')
     .then((card) => res.status(OK).send({ data: card }))
-    .catch(() => res.status(INTERNAL_SERVER_ERROR).send({ message: 'На сервере произошла ошибка' }));
+    .catch((err) => next(err));
 };
 
-const createCard = (req, res) => {
+const createCard = (req, res, next) => {
   const {
     name, link,
   } = req.body;
   Card.create({
-    name, link, owner: req.user._id,
+    name, link, owner: req.user,
   })
     .then((card) => res.status(CREATED).send({ data: card }))
-    .catch((err) => {
-      if (err.name === 'ValidationError') {
-        res.status(BAD_REQUEST).send({ message: 'Переданы некорректные данные при создании карточки' });
-      } else {
-        res.status(INTERNAL_SERVER_ERROR).send({ message: 'На сервере произошла ошибка' });
-      }
-    });
+    .catch((err) => next(err));
 };
 
-const deleteCard = (req, res) => {
-  Card.findByIdAndRemove(req.params.cardId)
-    .orFail(new NotValidIdError('NotValidId'))
-    .then((card) => res.status(OK).send({ data: card }))
-    .catch((err) => {
-      switch (err.name) {
-        case 'CastError':
-          res.status(BAD_REQUEST).send({ message: 'Карточка с указанным _id не найдена. Некорректный id' });
-          break;
-        case 'NotValidId':
-          res.status(NOT_FOUND).send({ message: 'Карточка с указанным _id не найдена. Не существующий id' });
-          break;
-        default:
-          res.status(INTERNAL_SERVER_ERROR).send({ message: 'На сервере произошла ошибка' });
+const deleteCard = (req, res, next) => {
+  Card.findById(req.params.cardId)
+    .orFail(new NotFoundError('Карточка с указанным _id не найдена. Не существующий id'))
+    .then((card) => {
+      if (card.owner._id.toString() !== req.user._id) {
+        throw new ForbiddenError('Нельзя удалить чужую карточку');
       }
-    });
+      Card.findByIdAndRemove(req.params.cardId)
+        .then((deletedCard) => {
+          res.status(OK).send({ data: deletedCard });
+        });
+    })
+    .catch((err) => next(err));
 };
 
-const addLikeCard = (req, res) => {
+const addLikeCard = (req, res, next) => {
   Card.findByIdAndUpdate(req.params.cardId, { $addToSet: { likes: req.user._id } }, { new: true })
-    .orFail(new NotValidIdError('NotValidId'))
+    .orFail(new NotFoundError('Передан несуществующий _id карточки'))
     .then((card) => res.status(OK).send({ data: card }))
-    .catch((err) => {
-      switch (err.name) {
-        case 'NotValidId':
-          res.status(NOT_FOUND).send({ message: 'Передан несуществующий _id карточки' });
-          break;
-        case 'CastError':
-          res.status(BAD_REQUEST).send({ message: 'Передан некорректный _id карточки' });
-          break;
-        case 'ValidationError':
-          res.status(BAD_REQUEST).send({ message: 'Переданы некорректные данные для постановки лайка' });
-          break;
-        default:
-          res.status(INTERNAL_SERVER_ERROR).send({ message: 'На сервере произошла ошибка' });
-      }
-    });
+    .catch((err) => next(err));
 };
 
-const deleteLikeCard = (req, res) => {
+const deleteLikeCard = (req, res, next) => {
   Card.findByIdAndUpdate(req.params.cardId, { $pull: { likes: req.user._id } }, { new: true })
-    .orFail(new NotValidIdError('NotValidId'))
+    .orFail(new NotFoundError('Передан несуществующий _id карточки'))
     .then((card) => res.status(OK).send({ data: card }))
-    .catch((err) => {
-      switch (err.name) {
-        case 'NotValidId':
-          res.status(NOT_FOUND).send({ message: 'Передан несуществующий _id карточки' });
-          break;
-        case 'CastError':
-          res.status(BAD_REQUEST).send({ message: 'Передан некорректный _id карточки' });
-          break;
-        case 'ValidationError':
-          res.status(BAD_REQUEST).send({ message: 'Переданы некорректные данные для снятия лайка' });
-          break;
-        default:
-          res.status(INTERNAL_SERVER_ERROR).send({ message: 'На сервере произошла ошибка' });
-      }
-    });
+    .catch((err) => next(err));
 };
 
 module.exports = {
