@@ -24,7 +24,7 @@ app.use('/cards', auth, cards);
 app.post('/signin', celebrate({
   body: Joi.object().keys({
     email: Joi.string().required().email().regex(/[\w-]+@[a-z]*\.[a-z]*/),
-    password: Joi.string().required(),
+    password: Joi.string().required().min(5),
   }),
 }), login);
 app.post('/signup', celebrate({
