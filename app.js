@@ -23,7 +23,7 @@ app.use('/users', auth, users);
 app.use('/cards', auth, cards);
 app.post('/signin', celebrate({
   body: Joi.object().keys({
-    email: Joi.string().required(),
+    email: Joi.string().required().email().regex(/[\w-]+@[a-z]*\.[a-z]*/),
     password: Joi.string().required(),
   }),
 }), login);
@@ -31,8 +31,8 @@ app.post('/signup', celebrate({
   body: Joi.object().keys({
     name: Joi.string().min(2).max(30),
     about: Joi.string().min(2).max(30),
-    avatar: Joi.string(),
-    email: Joi.string().required().email(),
+    avatar: Joi.string().regex(/^https?:\/\/([\w-]+\.)+([a-z])+(\/[\w\-.]*)*/),
+    email: Joi.string().required().email().regex(/[\w-]+@[a-z]*\.[a-z]*/),
     password: Joi.string().required().min(5),
   }),
 }), createUser);

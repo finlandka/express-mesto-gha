@@ -20,7 +20,7 @@ users.patch('/me', celebrate({
 }), updateUser);
 users.patch('/me/avatar', celebrate({
   body: Joi.object().keys({
-    avatar: Joi.string().regex(/^https?:\/\/([a-z0-9\\-]+\.)*ru(\/[a-z\\/]*)*$/),
+    avatar: Joi.string().regex(/^https?:\/\/([\w-]+\.)+([a-z])+(\/[\w\-.]*)*/),
   }).unknown(true),
 }), updateAvatar);
 

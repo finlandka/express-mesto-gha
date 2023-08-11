@@ -8,7 +8,7 @@ cards.get('/', getCards);
 cards.post('/', celebrate({
   body: Joi.object().keys({
     name: Joi.string().required().min(2).max(30),
-    link: Joi.string().required().regex(/^https?:\/\/([a-z0-9\\-]+\.)*ru(\/[a-z\\/]*)*$/),
+    link: Joi.string().required().regex(/^https?:\/\/([a-z0-9-]+\.)+([a-z])+(\/[a-z0-9\-._]*)*/),
   }).unknown(true),
 }), createCard);
 cards.delete('/:cardId', celebrate({
