@@ -40,7 +40,7 @@ const userSchema = new mongoose.Schema({
     required: true,
     unique: true,
     validate: {
-      validator: (v) => /[\w-]+@[a-z]*\.[a-z]*/.test(v),
+      validator: (v) => /[\w-]+@[\w-]*\.[a-z]*/.test(v),
       message: 'Некорректный email',
     },
   },

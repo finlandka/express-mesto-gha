@@ -33,7 +33,11 @@ const createUser = (req, res, next) => {
     .then((hash) => User.create({
       name, about, avatar, email, password: hash,
     }))
-    .then((newUser) => res.status(CREATED).send({ data: newUser }))
+    .then((newUser) => {
+      const user = newUser.toObject();
+      delete user.password;
+      res.status(CREATED).send({ data: user });
+    })
     .catch((err) => {
       if (err.code === 11000) {
         next(new ConflictError('Пользователь с таким email уже существует'));
