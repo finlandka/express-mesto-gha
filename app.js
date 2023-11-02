@@ -7,6 +7,7 @@ const cookieParser = require('cookie-parser');
 const bodyParser = require('body-parser');
 const helmet = require('helmet');
 const { errors } = require('celebrate');
+const { requestLogger, errorLogger } = require('./middlewares/logger');
 const users = require('./routes/users');
 const cards = require('./routes/cards');
 const auth = require('./middlewares/auth');
@@ -27,6 +28,8 @@ app.use(helmet());
 app.use(cookieParser());
 app.use(bodyParser.json());
 
+app.use(requestLogger);
+
 app.use('/users', auth, users);
 app.use('/cards', auth, cards);
 app.post('/signin', validateAuth, login);
@@ -34,6 +37,8 @@ app.post('/signup', validateRegister, createUser);
 app.use('*', (req, res, next) => {
   next(new NotFoundError('Запрашиваемый ресурс не найден'));
 });
+
+app.use(errorLogger);
 app.use(errors());
 app.use(errorHandler);
 
