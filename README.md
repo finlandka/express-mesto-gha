@@ -1,7 +1,11 @@
-[![Tests](../../actions/workflows/tests-13-sprint.yml/badge.svg)](../../actions/workflows/tests-13-sprint.yml) [![Tests](../../actions/workflows/tests-14-sprint.yml/badge.svg)](../../actions/workflows/tests-14-sprint.yml)
 # Проект Mesto бэкенд
 
 Бэк проекта Место. Функциональность: получение данных пользователя/пользователей, обновление данных текущего пользователя, создание/удаление карточек, добавление/удаление лайков карточек.
+
+## Технологии
+* MongoDB
+* Express.js
+* Node v.16.20.2 и выше
 
 ## Запуск проекта
 
